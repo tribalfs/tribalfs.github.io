@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tribalfs.scorer",
+      "sha256_cert_fingerprints": [
+        "AE:4E:84:AC:AF:80:CB:DA:27:23:C1:B7:AA:DE:A8:99:F5:3F:5B:99:40:2A:81:57:8F:EC:04:A2:40:A5:FE:5A",
+        "2E:E8:0C:0F:63:28:A4:F9:F6:47:75:64:F0:68:E6:50:02:7A:DF:46:09:8F:51:11:60:95:B7:5E:8C:24:61:AF"
+      ]
+    }
+  }
+]
