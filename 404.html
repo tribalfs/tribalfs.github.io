@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting — tribalfs</title>
+  <script>
+    (function() {
+      var path = window.location.pathname;
+      // If path belongs to Box Score app deeplink (/boxscore or /boxscore/...)
+      if (path.indexOf('/boxscore') === 0) {
+        var packageName = "com.tribalfs.scorer";
+        var fullPath = window.location.pathname + window.location.search + window.location.hash;
+        var playStoreUrl = "https://play.google.com/store/apps/details?id=" + packageName;
+
+        var intentUrl = "intent://tribalfs.github.io" + fullPath +
+          "#Intent;scheme=https;package=" + packageName +
+          ";S.browser_fallback_url=" + encodeURIComponent(playStoreUrl) + ";end";
+
+        var isAndroid = /Android/i.test(navigator.userAgent);
+        if (isAndroid) {
+          window.location.href = intentUrl;
+        } else {
+          window.location.replace("/boxscore/");
+        }
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --oneui-bg: #07090e;
+      --oneui-surface: rgba(22, 27, 38, 0.65);
+      --oneui-card-border: rgba(255, 255, 255, 0.12);
+      --oneui-blue: #3b82f6;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --radius-xl: 32px;
+      --radius-pill: 9999px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--oneui-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .card {
+      background: var(--oneui-surface);
+      border: 1px solid var(--oneui-card-border);
+      border-radius: var(--radius-xl);
+      padding: 40px 32px;
+      max-width: 420px;
+      width: 100%;
+      backdrop-filter: blur(20px);
+    }
+
+    h1 { font-size: 2rem; margin-bottom: 12px; }
+    p { color: var(--text-secondary); margin-bottom: 24px; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      background: var(--oneui-blue);
+      color: #fff;
+      text-decoration: none;
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>404</h1>
+    <p>Page or deep link target not found.</p>
+    <a href="/" class="btn">Return to tribalfs Home</a>
+  </div>
+</body>
+</html>

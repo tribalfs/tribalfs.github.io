@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>tribalfs — GAAP certified, API curious</title>
+  <meta name="description" content="High-performance Android utilities, system display tools, OneUI libraries, and finance applications by tribalfs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* OneUI 9 Dynamic Glass Palette */
+      --oneui-bg: #07090e;
+      --oneui-surface: rgba(22, 27, 38, 0.45);
+      --oneui-surface-hover: rgba(30, 38, 54, 0.65);
+      --oneui-card-border: rgba(255, 255, 255, 0.1);
+      --oneui-card-hover-border: rgba(96, 165, 250, 0.5);
+      --oneui-blue: #3b82f6;
+      --oneui-blue-light: #60a5fa;
+      --oneui-blue-glow: rgba(59, 130, 246, 0.3);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-pill: 40px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--oneui-bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+    }
+
+    /* Ambient Background Container (Dynamic Gradient Backdrop) */
+    .ambient-blur-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.22;
+      animation: floatOrb 22s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.6) 0%, rgba(59, 130, 246, 0.2) 100%);
+      top: -120px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, rgba(236, 72, 153, 0.15) 100%);
+      top: 35%;
+      right: -150px;
+      animation-delay: -6s;
+    }
+
+    .orb-3 {
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.6) 0%, rgba(16, 185, 129, 0.15) 100%);
+      bottom: -150px;
+      left: 15%;
+      animation-delay: -12s;
+    }
+
+    /* Soft Center Backdrop Ambient Glow Orb */
+    .orb-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 750px;
+      height: 750px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(11, 104, 158, 0.15) 45%, transparent 70%);
+      filter: blur(80px);
+      pointer-events: none;
+      animation: pulseCenterOrb 12s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseCenterOrb {
+      0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.7; }
+      100% { transform: translate(-50%, -50%) scale(1.08); opacity: 0.9; }
+    }
+
+    /* 3 Distributed Backdrop Arrowhead Watermarks (30%, 35%, 40% scale) */
+    .backdrop-chevron {
+      position: absolute;
+      filter: blur(1px) drop-shadow(0 0 16px rgba(59, 130, 246, 0.35));
+      pointer-events: none;
+    }
+
+    /* Arrow 1: 30% Scale (Top-Left Area) */
+    .chevron-1 {
+      top: 18%;
+      left: 12%;
+      width: 306px; /* 30% of 1020px */
+      height: 306px;
+      opacity: 0.75;
+      animation: floatChevron1 16s ease-in-out infinite alternate;
+    }
+
+    /* Arrow 2: 35% Scale (Center-Right Area) */
+    .chevron-2 {
+      top: 52%;
+      right: 8%;
+      width: 357px; /* 35% of 1020px */
+      height: 357px;
+      opacity: 0.8;
+      animation: floatChevron2 18s ease-in-out infinite alternate;
+    }
+
+    /* Arrow 3: 40% Scale (Bottom-Left Area) */
+    .chevron-3 {
+      top: 80%;
+      left: 16%;
+      width: 408px; /* 40% of 1020px */
+      height: 408px;
+      opacity: 0.85;
+      animation: floatChevron3 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatChevron1 {
+      0% { transform: translate(0, 0) scale(0.98) rotate(-2deg); }
+      100% { transform: translate(25px, 20px) scale(1.04) rotate(2deg); }
+    }
+
+    @keyframes floatChevron2 {
+      0% { transform: translate(0, 0) scale(1.02) rotate(3deg); }
+      100% { transform: translate(-20px, 30px) scale(0.96) rotate(-1deg); }
+    }
+
+    @keyframes floatChevron3 {
+      0% { transform: translate(0, 0) scale(0.95); }
+      100% { transform: translate(30px, -25px) scale(1.05); }
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(70px, 45px) scale(1.12); }
+      100% { transform: translate(-50px, 90px) scale(0.92); }
+    }
+
+    /* Container */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Sticky Pinned Header */
+    header {
+      position: sticky;
+      top: 16px;
+      z-index: 100;
+      padding: 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Constant Base Alignment for Top Left Profile Logo */
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      overflow: hidden;
+      padding: 6px 10px; /* Constant Padding - No Shift */
+      border-radius: var(--radius-pill);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    /* Scrolled State: Standalone Glass Pill for Top-Left Profile */
+    header.scrolled .brand {
+      background: rgba(22, 27, 38, 0.88);
+      border-color: var(--oneui-card-border);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 20px var(--oneui-blue-glow);
+      padding: 6px 3px 6px 10px; /* Right padding further reduced by 20% to 3px */
+      gap: 7px; /* Zero gap when title is collapsed */
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%; /* Perfect Circle */
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      object-fit: cover;
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+
+    /* Brand Profile Name Smooth Collapse when Scrolled Up */
+    .brand-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      max-width: 150px;
+      opacity: 1;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+      display: inline-block;
+    }
+
+    header.scrolled .brand-title {
+      max-width: 0;
+      opacity: 0;
+      margin: 0;
+      transform: translateX(-10px);
+      pointer-events: none;
+    }
+
+    /* Separate Top Navigation Menu Bar Glass Pill - Constant Alignment */
+    .nav-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 10px; /* Constant Padding - No Shift */
+      border-radius: var(--radius-pill);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    /* Scrolled State: Standalone Separated Glass Pill Bar for Top Menu Links */
+    header.scrolled .nav-links {
+      background: rgba(22, 27, 38, 0.88);
+      border-color: var(--oneui-card-border);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 20px var(--oneui-blue-glow);
+      padding: 6px 10px; /* Constant Padding - No Shift */
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-btn {
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--oneui-card-border);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.25), background 0.2s ease, border-color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn:hover {
+      background: var(--oneui-blue);
+      border-color: transparent;
+      box-shadow: 0 4px 20px var(--oneui-blue-glow);
+    }
+
+    /* OneUI Hero Banner Card with Tightened Backdrop Blur */
+    .hero-card {
+      background: var(--oneui-surface);
+      border: 1px solid var(--oneui-card-border);
+      border-radius: var(--radius-xl);
+      padding: 56px 40px;
+      text-align: center;
+      margin: 20px 0 50px;
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-avatar-wrapper {
+      margin-bottom: 24px;
+    }
+
+    .hero-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%; /* Perfect Circle */
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+      object-fit: cover;
+    }
+
+    .tagline-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 22px;
+      border-radius: var(--radius-pill);
+      background: rgba(59, 130, 246, 0.18);
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      color: var(--oneui-blue-light);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+
+    /* OneUI Section Container with Tightened Backdrop Blur */
+    .section-container {
+      background: var(--oneui-surface);
+      border: 1px solid var(--oneui-card-border);
+      border-radius: var(--radius-xl);
+      padding: 36px 32px;
+      margin-bottom: 40px;
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-header {
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      color: var(--text-primary);
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    /* Dynamic Glassmorphism Card (Tightened Blur so Arrow Shape Remains Crisp Under Cards) */
+    .app-card {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--oneui-card-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.25), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Glass Shimmer Line */
+    .app-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+    }
+
+    .app-card:hover {
+      background: var(--oneui-surface-hover);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .app-play-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px; /* OneUI Squircle App Icon */
+      object-fit: cover;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    }
+
+    .app-icon-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .icon-ledger { background: linear-gradient(135deg, #10b981, #f59e0b); }
+    .icon-code { background: linear-gradient(135deg, #4f46e5, #9333ea); }
+
+    .app-name {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    .app-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      flex-grow: 1;
+      line-height: 1.5;
+    }
+
+    .app-badge-group {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+    }
+
+    .badge-coming-soon {
+      background: rgba(251, 191, 36, 0.18);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      color: var(--accent-amber);
+    }
+
+    /* Full-Width OneUI Action Buttons with SeslRecoilAnimator Click Animation */
+    .btn-group-vertical {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .app-action-btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      height: 38px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--oneui-card-border);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      /* SeslRecoilAnimator Smooth Recoil Elastic Easing on Buttons ONLY */
+      transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.25), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* OneUI SeslRecoilAnimator Press Effect - Strictly on Interactive Buttons */
+    .recoil-active,
+    .app-action-btn:active,
+    .nav-btn:active {
+      transform: scale(0.95) !important;
+      transition: transform 0.08s cubic-bezier(0, 0, 0.2, 1) !important;
+    }
+
+    .btn-playstore {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+    }
+
+    .btn-playstore:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 16px rgba(0, 230, 118, 0.25);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 36px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .footer-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-link:hover {
+      color: var(--oneui-blue-light);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hero-card { padding: 40px 20px; }
+      .hero-title { font-size: 32px; }
+      .hero-subtitle { font-size: 15px; }
+      .section-container { padding: 24px 18px; }
+      header { flex-direction: column; gap: 16px; align-items: flex-start; }
+      footer { flex-direction: column; align-items: flex-start; }
+      .chevron-1 { width: 220px; height: 220px; }
+      .chevron-2 { width: 250px; height: 250px; }
+      .chevron-3 { width: 280px; height: 280px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Blurred Orbs + Center Backdrop Glow + 3 Distributed Arrowhead Watermarks -->
+  <div class="ambient-blur-container">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb-center"></div>
+
+    <!-- Arrow 1 (30% scale, Top-Left quadrant) -->
+    <svg class="backdrop-chevron chevron-1" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="chevronGlow1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+          <stop offset="50%" stop-color="#60a5fa" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.25" />
+        </linearGradient>
+      </defs>
+      <path d="M 420,95 L 760,500 L 420,905 L 391,905 L 625,500 L 391,95 Z" fill="url(#chevronGlow1)" />
+    </svg>
+
+    <!-- Arrow 2 (35% scale, Center-Right quadrant) -->
+    <svg class="backdrop-chevron chevron-2" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="chevronGlow2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8" />
+          <stop offset="50%" stop-color="#60a5fa" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#818cf8" stop-opacity="0.25" />
+        </linearGradient>
+      </defs>
+      <path d="M 420,95 L 760,500 L 420,905 L 391,905 L 625,500 L 391,95 Z" fill="url(#chevronGlow2)" />
+    </svg>
+
+    <!-- Arrow 3 (40% scale, Bottom-Left quadrant) -->
+    <svg class="backdrop-chevron chevron-3" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="chevronGlow3" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85" />
+          <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.55" />
+          <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.3" />
+        </linearGradient>
+      </defs>
+      <path d="M 420,95 L 760,500 L 420,905 L 391,905 L 625,500 L 391,95 Z" fill="url(#chevronGlow3)" />
+    </svg>
+  </div>
+
+  <div class="container">
+    <!-- Header / OneUI Bar -->
+    <header>
+      <a href="/" class="brand">
+        <img src="assets/tribalfs-brand-logo.png" alt="tribalfs" class="brand-logo">
+        <span class="brand-title">tribalfs</span>
+      </a>
+      <div class="nav-links">
+        <a href="#apps" class="nav-link">Apps</a>
+        <a href="#open-source" class="nav-link">Open Source</a>
+        <a href="/app-ads.txt" class="nav-link">app-ads.txt</a>
+        <a href="https://github.com/tribalfs" target="_blank" rel="noopener" class="nav-btn recoil-element">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </header>
+
+    <!-- OneUI Hero Banner Card -->
+    <section class="hero-card">
+      <div class="hero-avatar-wrapper">
+        <img src="assets/tribalfs-brand-logo.png" alt="tribalfs" class="hero-avatar">
+      </div>
+      <div class="tagline-pill">
+        <span>⚡</span> GAAP certified, API curious
+      </div>
+      <h1 class="hero-title">Precision Mobile Tools, Financial Software & Open Source Libraries</h1>
+      <p class="hero-subtitle">
+        Building high-performance Android system utilities, display calibration tools, Samsung OneUI libraries, and GAAP-standard financial accounting software.
+      </p>
+    </section>
+
+    <!-- Published Mobile Apps Section -->
+    <section id="apps" class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Mobile Applications</h2>
+      </div>
+
+      <div class="apps-grid">
+        <!-- Pixels -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <img src="https://play-lh.googleusercontent.com/VDs97Ep3F9IMs-jcbz9hWNBc_MUL7GOlRB_oFBU0XxVg_ZemGVptnonmxH5-3xb5i-5Gnz3bnxKgKVPbbcRhJw=s128" alt="Pixels Icon" class="app-play-icon">
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Display</span>
+              <span class="badge">DPI & Resolution</span>
+            </div>
+            <h3 class="app-name">Pixels: Resolution+DPI Changer</h3>
+            <p class="app-desc">
+              Rootless smart display resolution, density (DPI), and refresh rate manager engineered for custom Android display setups.
+            </p>
+          </div>
+          <div class="btn-group-vertical">
+            <a href="https://play.google.com/store/apps/details?id=com.tribalfs.pixels" target="_blank" rel="noopener" class="app-action-btn btn-playstore recoil-element">
+              <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.608 1.626L14.28 12 3.608 22.374C3.25 22.122 3 21.642 3 21.01V2.99c0-.632.25-1.112.608-1.364z" fill="#00e676"/>
+                <path d="M17.848 8.563l-3.568 3.437 3.568 3.437 3.228-1.838c1.173-.668 1.173-1.808 0-2.476l-3.228-1.56z" fill="#ffbc00"/>
+                <path d="M3.608 1.626L14.28 12 17.848 8.563 5.438.356c-.636-.362-1.282-.204-1.83.27z" fill="#00b0ff"/>
+                <path d="M3.608 22.374L17.848 15.437 14.28 12 3.608 22.374z" fill="#ff3d00"/>
+              </svg>
+              Google Play
+            </a>
+            <a href="https://github.com/tribalfs/PixelsPub" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Galaxy MaxHz -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <img src="https://play-lh.googleusercontent.com/kCnns-JdwajzGldl-Ww7FM-FmgQje7xWJ8fvnt1CwROQG717HUpHSv0yjV-wXgcWVKRboQA6yDnLKu858dE3Bw=s128" alt="Galaxy MaxHz Icon" class="app-play-icon">
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Samsung</span>
+              <span class="badge">Refresh Rate</span>
+            </div>
+            <h3 class="app-name">Galaxy MaxHz</h3>
+            <p class="app-desc">
+              Advanced adaptive refresh rate control, quick-doze battery mods, screen-off tweaks, and status bar Hz monitor for Samsung Galaxy devices.
+            </p>
+          </div>
+          <div class="btn-group-vertical">
+            <a href="https://play.google.com/store/apps/details?id=com.tribalfs.gmh_donate" target="_blank" rel="noopener" class="app-action-btn btn-playstore recoil-element">
+              <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.608 1.626L14.28 12 3.608 22.374C3.25 22.122 3 21.642 3 21.01V2.99c0-.632.25-1.112.608-1.364z" fill="#00e676"/>
+                <path d="M17.848 8.563l-3.568 3.437 3.568 3.437 3.228-1.838c1.173-.668 1.173-1.808 0-2.476l-3.228-1.56z" fill="#ffbc00"/>
+                <path d="M3.608 1.626L14.28 12 17.848 8.563 5.438.356c-.636-.362-1.282-.204-1.83.27z" fill="#00b0ff"/>
+                <path d="M3.608 22.374L17.848 15.437 14.28 12 3.608 22.374z" fill="#ff3d00"/>
+              </svg>
+              Google Play
+            </a>
+            <a href="https://github.com/tribalfs/GalaxyMaxHzPub" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Real-time FPS Monitor -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <img src="https://play-lh.googleusercontent.com/mNeVVmHCbYZXTTz0Z3nGpcPuphsQrHQXmORbk8ckas4ogggy3DzTpoIQzmZwVZHhcY6WvK40Ybkj4tiulftIUg=s128" alt="Real-time FPS Icon" class="app-play-icon">
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Gaming</span>
+              <span class="badge">Performance</span>
+            </div>
+            <h3 class="app-name">Real-time FPS Monitor</h3>
+            <p class="app-desc">
+              Live frame rate overlay and screen refresh rate tracking tool for mobile gamers, performance testers, and developers.
+            </p>
+          </div>
+          <div class="btn-group-vertical">
+            <a href="https://play.google.com/store/apps/details?id=com.tribalfs.realtimefps" target="_blank" rel="noopener" class="app-action-btn btn-playstore recoil-element">
+              <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.608 1.626L14.28 12 3.608 22.374C3.25 22.122 3 21.642 3 21.01V2.99c0-.632.25-1.112.608-1.364z" fill="#00e676"/>
+                <path d="M17.848 8.563l-3.568 3.437 3.568 3.437 3.228-1.838c1.173-.668 1.173-1.808 0-2.476l-3.228-1.56z" fill="#ffbc00"/>
+                <path d="M3.608 1.626L14.28 12 17.848 8.563 5.438.356c-.636-.362-1.282-.204-1.83.27z" fill="#00b0ff"/>
+                <path d="M3.608 22.374L17.848 15.437 14.28 12 3.608 22.374z" fill="#ff3d00"/>
+              </svg>
+              Google Play
+            </a>
+            <a href="https://github.com/tribalfs/RealTimeFpsPub" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Box Score Pro -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <img src="https://play-lh.googleusercontent.com/ZvuMkx6OduD1Tjfkbl340RTsK9VZdFUcLfgGuGFvQSpOd6Fpib9rg-Hs7VFGwFbT3G87EhAnA4x6P8C7HgXKvxA=s128" alt="Box Score Icon" class="app-play-icon">
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Utilities</span>
+              <span class="badge">Sports</span>
+            </div>
+            <h3 class="app-name">Box Score: Score Tracker Pro</h3>
+            <p class="app-desc">
+              Comprehensive, versatile game score tracking, player stats log, and match analytics for sports and tabletop games.
+            </p>
+          </div>
+          <div class="btn-group-vertical">
+            <a href="https://play.google.com/store/apps/details?id=com.tribalfs.scorer" target="_blank" rel="noopener" class="app-action-btn btn-playstore recoil-element">
+              <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.608 1.626L14.28 12 3.608 22.374C3.25 22.122 3 21.642 3 21.01V2.99c0-.632.25-1.112.608-1.364z" fill="#00e676"/>
+                <path d="M17.848 8.563l-3.568 3.437 3.568 3.437 3.228-1.838c1.173-.668 1.173-1.808 0-2.476l-3.228-1.56z" fill="#ffbc00"/>
+                <path d="M3.608 1.626L14.28 12 17.848 8.563 5.438.356c-.636-.362-1.282-.204-1.83.27z" fill="#00b0ff"/>
+                <path d="M3.608 22.374L17.848 15.437 14.28 12 3.608 22.374z" fill="#ff3d00"/>
+              </svg>
+              Google Play
+            </a>
+            <a href="https://github.com/tribalfs/BoxScorePub" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Display Checker -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <img src="https://play-lh.googleusercontent.com/asccgjPm5HgJdTZgWVG_GSrQeuz-FPTc1HYpjTw223DgJ7xQ7SHXbxUG-WVurLM50t-b4DbQ24mqxtgUZXqd=s128" alt="Display Checker Icon" class="app-play-icon">
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Hardware</span>
+              <span class="badge">Diagnostics</span>
+            </div>
+            <h3 class="app-name">Display Checker & Refresh Rate</h3>
+            <p class="app-desc">
+              Instant hardware capability inspector, HDR/color gamut checker, and Hz diagnostics for mobile displays.
+            </p>
+          </div>
+          <div class="btn-group-vertical">
+            <a href="https://play.google.com/store/apps/details?id=com.tribalfs.displayinfo" target="_blank" rel="noopener" class="app-action-btn btn-playstore recoil-element">
+              <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3.608 1.626L14.28 12 3.608 22.374C3.25 22.122 3 21.642 3 21.01V2.99c0-.632.25-1.112.608-1.364z" fill="#00e676"/>
+                <path d="M17.848 8.563l-3.568 3.437 3.568 3.437 3.228-1.838c1.173-.668 1.173-1.808 0-2.476l-3.228-1.56z" fill="#ffbc00"/>
+                <path d="M3.608 1.626L14.28 12 17.848 8.563 5.438.356c-.636-.362-1.282-.204-1.83.27z" fill="#00b0ff"/>
+                <path d="M3.608 22.374L17.848 15.437 14.28 12 3.608 22.374z" fill="#ff3d00"/>
+              </svg>
+              Google Play
+            </a>
+            <a href="https://github.com/tribalfs/displayChecker" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        <!-- Mobile Ledger / Accountant -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <div class="app-icon-wrapper icon-ledger">📊</div>
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Finance</span>
+              <span class="badge">GAAP</span>
+              <span class="badge badge-coming-soon">Coming Soon</span>
+            </div>
+            <h3 class="app-name">Mobile Ledger / Accountant</h3>
+            <p class="app-desc">
+              Double-entry bookkeeping and personal finance software designed to strict GAAP accounting standards with API curiosity.
+            </p>
+          </div>
+          <div class="btn-group-vertical">
+            <a href="https://github.com/tribalfs/MobileLedgerPub" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              GitHub Repository
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Open Source Libraries Section -->
+    <section id="open-source" class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Open Source Frameworks & UI Libraries</h2>
+      </div>
+
+      <div class="apps-grid">
+        <!-- oneui-design -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <div class="app-icon-wrapper icon-code">🎨</div>
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Android Library</span>
+              <span class="badge">OneUI</span>
+            </div>
+            <h3 class="app-name">oneui-design</h3>
+            <p class="app-desc">
+              Complementary design library for SESL8, SESL7, and SESL6 modules for creating native OneUI-styled Android applications.
+            </p>
+          </div>
+          <a href="https://github.com/tribalfs/oneui-design" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub Repository
+          </a>
+        </div>
+
+        <!-- sesl-androidx -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <div class="app-icon-wrapper icon-code">⚙️</div>
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">AndroidX</span>
+              <span class="badge">SESL</span>
+            </div>
+            <h3 class="app-name">sesl-androidx</h3>
+            <p class="app-desc">
+              Modified AndroidX framework modules customized for building native OneUI-styled Android applications.
+            </p>
+          </div>
+          <a href="https://github.com/tribalfs/sesl-androidx" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub Repository
+          </a>
+        </div>
+
+        <!-- sesl-material-components-android -->
+        <div class="app-card">
+          <div>
+            <div class="card-header">
+              <div class="app-icon-wrapper icon-code">📦</div>
+            </div>
+            <div class="app-badge-group">
+              <span class="badge">Material Design</span>
+              <span class="badge">SESL</span>
+            </div>
+            <h3 class="app-name">sesl-material-components</h3>
+            <p class="app-desc">
+              Modified Material Design Components for Android tailored for implementing Samsung OneUI-styled user interfaces.
+            </p>
+          </div>
+          <a href="https://github.com/tribalfs/sesl-material-components-android" target="_blank" rel="noopener" class="app-action-btn btn-secondary recoil-element">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub Repository
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        © <script>document.write(new Date().getFullYear())</script> <strong>tribalfs</strong>. GAAP certified, API curious.
+      </div>
+      <div class="footer-links">
+        <a href="/app-ads.txt" class="footer-link">app-ads.txt</a>
+        <a href="https://play.google.com/store/apps/dev?id=8003566057945932134" target="_blank" rel="noopener" class="footer-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3.608 1.626L14.28 12 3.608 22.374C3.25 22.122 3 21.642 3 21.01V2.99c0-.632.25-1.112.608-1.364z"/><path d="M17.848 8.563l-3.568 3.437 3.568 3.437 3.228-1.838c1.173-.668 1.173-1.808 0-2.476l-3.228-1.56z"/><path d="M3.608 1.626L14.28 12 17.848 8.563 5.438.356c-.636-.362-1.282-.204-1.83.27z"/><path d="M3.608 22.374L17.848 15.437 14.28 12 3.608 22.374z"/></svg>
+          Google Play
+        </a>
+        <a href="https://github.com/tribalfs" target="_blank" rel="noopener" class="footer-link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- JavaScript for OneUI Recoil Click Effect & 120FPS Smooth Parallax Scroll Animation for Backdrop Arrowheads -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // OneUI SeslRecoilAnimator Interactive Elastic Touch/Click Effect
+      const recoilElements = document.querySelectorAll('.recoil-element, .app-action-btn, .nav-btn');
+
+      recoilElements.forEach(el => {
+        el.addEventListener('mousedown', () => el.classList.add('recoil-active'));
+        el.addEventListener('mouseup', () => el.classList.remove('recoil-active'));
+        el.addEventListener('mouseleave', () => el.classList.remove('recoil-active'));
+        el.addEventListener('touchstart', () => el.classList.add('recoil-active'), { passive: true });
+        el.addEventListener('touchend', () => el.classList.remove('recoil-active'));
+        el.addEventListener('touchcancel', () => el.classList.remove('recoil-active'));
+      });
+
+      // Smooth 120FPS Scroll-Driven Parallax & Sticky Pinned Header Transformation
+      const header = document.querySelector('header');
+      const chev1 = document.querySelector('.chevron-1');
+      const chev2 = document.querySelector('.chevron-2');
+      const chev3 = document.querySelector('.chevron-3');
+
+      let ticking = false;
+
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            const scY = window.scrollY;
+
+            // Toggle Pinned Header Scrolled Rounded Background & Profile Name Collapse
+            if (header) {
+              if (scY > 20) {
+                header.classList.add('scrolled');
+              } else {
+                header.classList.remove('scrolled');
+              }
+            }
+
+            if (chev1) chev1.style.transform = `translate3d(${scY * 0.05}px, ${scY * 0.12}px, 0) rotate(${scY * 0.012}deg)`;
+            if (chev2) chev2.style.transform = `translate3d(${-scY * 0.04}px, ${-scY * 0.08}px, 0) rotate(${-scY * 0.015}deg)`;
+            if (chev3) chev3.style.transform = `translate3d(${scY * 0.06}px, ${scY * 0.1}px, 0) rotate(${scY * 0.01}deg)`;
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+    });
+  </script>
+
+</body>
+</html>
