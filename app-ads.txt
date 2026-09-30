@@ -1,4 +1,4 @@
-# Merged app-ads.txt - Generated 2026-09-22 00:37:31 UTC
+# Merged app-ads.txt - Generated 2026-09-30 22:53:06 UTC
 
 # Google AdMob
 google.com, pub-3239920037413959, DIRECT, f08c47fec0942fa0
@@ -395,6 +395,7 @@ zmaticoo.com,5135063,RESELLER
 zmaticoo.com,5135224,RESELLER
 zmaticoo.com,5135302,RESELLER
 zoomd.com,88478941,RESELLER
+
 # Mintegral
 mintegral.com, 70113, DIRECT, 0aeed750c80d6423
 pokkt.com, 7139, RESELLER, c45702d9311e25fd

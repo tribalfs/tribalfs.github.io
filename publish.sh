@@ -2,7 +2,8 @@
 set -e
 
 # Navigate to script directory (tribalfs.github.io project root)
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 OUTPUT_FILE="app-ads.txt"
 PUBLIC_OUTPUT="public/app-ads.txt"
@@ -14,36 +15,41 @@ LIFTOFF_PUB_ID="6a1b2fd986a0aae6f104b046"
 MINTEGRAL_PUB_ID="70113"
 UNITY_ORG_ID="126084542"
 
-# Optional: Trigger Liftoff browser download if --fetch-liftoff or --open-liftoff passed
-if [[ "$*" == *"--fetch-liftoff"* || "$*" == *"--open-liftoff"* ]]; then
-    echo "Opening Liftoff download URL in browser..."
-    open "https://publisher.vungle.com/vungleAdsTxt"
-    echo "Waiting 3 seconds for vungle.txt to download..."
-    sleep 3
+# Liftoff / Vungle app-ads.txt source selection:
+# Direct REST API endpoint hosted by Liftoff / Vungle
+LIFTOFF_API_URL="https://pub-ctrl-api.vungle.com/api/v1/adstxt/vungle"
+SHARED_LIFTOFF="${SCRIPT_DIR}/shared/liftoff-ads.txt"
+
+# Search for any manually downloaded Liftoff vendor file across common machine download locations:
+DOWNLOADED_LIFTOFF=""
+if [ -n "$LIFTOFF_FILE" ] && [ -f "$LIFTOFF_FILE" ]; then
+    DOWNLOADED_LIFTOFF="$LIFTOFF_FILE"
+else
+    DOWNLOADED_LIFTOFF="$(ls -t \
+        "$HOME/Downloads"/vungle*.txt "$HOME/Downloads"/vungleAdsTxt*.txt "$HOME/Downloads"/app-ads*.txt \
+        "$HOME/Desktop"/vungle*.txt "$HOME/Desktop"/vungleAdsTxt*.txt \
+        /tmp/vungle*.txt 2>/dev/null | head -n 1 || true)"
 fi
 
-# Liftoff / Vungle app-ads.txt source selection:
-# 1. Look for recently downloaded vungle*.txt or app-ads*.txt in ~/Downloads/
-# 2. Look for local shared/liftoff-ads.txt
-# 3. Fallback to hardcoded Base64 Data URI
-DOWNLOADED_LIFTOFF="$(ls -t "$HOME/Downloads"/vungle*.txt "$HOME/Downloads"/app-ads*.txt 2>/dev/null | head -n 1 || true)"
 if [ -f "$DOWNLOADED_LIFTOFF" ]; then
-    echo "Found downloaded Liftoff app-ads file: $DOWNLOADED_LIFTOFF"
-    LIFTOFF_SOURCE="$DOWNLOADED_LIFTOFF"
-elif [ -f "shared/liftoff-ads.txt" ]; then
-    LIFTOFF_SOURCE="shared/liftoff-ads.txt"
-else
-    LIFTOFF_SOURCE="${LIFTOFF_URL:-data:application/octet-stream;charset=utf-8;base64,dnVuZ2xlLmNvbSxbeW91clZ1bmdsZVB1Ymxpc2hlckFjY291bnRJRF0sRElSRUNULGMxMDdkNjg2YmVjZDJkNzcKMzNhY3Jvc3MuY29tLDAwMVBnMDAwMDE5N0tjS0lBVSxSRVNFTExFUixiYmVhMDZkOWM0ZDI4NTNjCkNvbnRleHR3ZWIuY29tLDU2Mjg1MixSRVNFTExFUiw8OWZmMTg1YTRjNGU4NTdj}"
+    if [ ! -f "$SHARED_LIFTOFF" ] || [ "$DOWNLOADED_LIFTOFF" -nt "$SHARED_LIFTOFF" ]; then
+        echo "Updating shared/liftoff-ads.txt from downloaded file: $DOWNLOADED_LIFTOFF"
+        mkdir -p "${SCRIPT_DIR}/shared"
+        cp "$DOWNLOADED_LIFTOFF" "$SHARED_LIFTOFF"
+    fi
 fi
+
+LIFTOFF_SOURCE="${LIFTOFF_URL:-$LIFTOFF_API_URL}"
 
 # Mintegral Documentation Markdown URL containing app-ads.txt records
 MINTEGRAL_DOC_URL="https://cdn-mtg-markdown.rayjump.com/cdn-adn/v2/markdown_v2/docs/1789989465/index.md"
 
 # Unity Ads file path selection:
+SHARED_UNITY="${SCRIPT_DIR}/shared/unity-ads.txt"
 if [ -n "$UNITY_URL" ]; then
     UNITY_SOURCE="$UNITY_URL"
-elif [ -f "shared/unity-ads.txt" ]; then
-    UNITY_SOURCE="shared/unity-ads.txt"
+elif [ -f "$SHARED_UNITY" ]; then
+    UNITY_SOURCE="$SHARED_UNITY"
 elif [ -f "$HOME/shared/unity-ads.txt" ]; then
     UNITY_SOURCE="$HOME/shared/unity-ads.txt"
 else
@@ -53,7 +59,15 @@ fi
 # Helper function to fetch or decode app-ads.txt entries from HTTP(S) URLs, data URIs, or files
 fetch_ads_txt() {
     local source="$1"
-    if [[ "$source" == data:*base64,* ]]; then
+    if [[ "$source" == "https://pub-ctrl-api.vungle.com/"* ]]; then
+        local content
+        content="$(curl -s -L "$source" | python3 -c "import sys, json; print(json.load(sys.stdin).get('value', ''))" 2>/dev/null || true)"
+        if [ -n "$content" ]; then
+            echo "$content"
+        elif [ -f "$SHARED_LIFTOFF" ]; then
+            cat "$SHARED_LIFTOFF"
+        fi
+    elif [[ "$source" == data:*base64,* ]]; then
         local b64="${source#*base64,}"
         echo "$b64" | base64 --decode
     elif [[ "$source" == http://* || "$source" == https://* ]]; then
