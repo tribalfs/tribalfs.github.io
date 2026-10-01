@@ -1,4 +1,4 @@
-# Merged app-ads.txt - Generated 2026-09-30 22:53:06 UTC
+# Merged app-ads.txt - Generated 2026-10-01 03:52:47 UTC
 
 # Google AdMob
 google.com, pub-3239920037413959, DIRECT, f08c47fec0942fa0
